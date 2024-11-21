@@ -1,13 +1,13 @@
 # Project Description
 
-Describe it here.
+This a snake game, which has levels after completing the every requirement require in each level.Right now I exatly dont know how to end this game.
 
 ## Needs to Have
 
-- thing
-- other thing
+- Make levels 
+- change into better background according to each levels
+- create a sound after each time the snake eat the food
 
 ## Nice to Have
 
-- thing
-- another thing
+- change the shape of rectangle snake into actual snake(if possible)
