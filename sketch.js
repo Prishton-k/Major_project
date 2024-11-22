@@ -53,7 +53,7 @@ function draw() {
 
   fill(0);
   textSize(16);
-  text("Score: " + score, 10, 20);
+  text("Score: " + score, 10,20);
 }
 
 
