@@ -21,6 +21,7 @@ function setup() {
   cols = floor(width / gridSize);
   rows = floor(height / gridSize);
   frameRate(10);
+  // Initialize grid as a 2D array
   grid = Array.from({ length: rows }, () => Array(cols).fill(0));
   snake = new Snake();
 
@@ -128,7 +129,7 @@ class Snake {
     // Mark the initial snake position on the grid
     grid[this.body[0].y][this.body[0].x] = 1;
   }
-
+  
   setDir(x, y) {
     this.dir = { x, y };
   }
@@ -141,12 +142,27 @@ class Snake {
     let head = this.body[this.body.length - 1];
     let newHead = { x: head.x + this.dir.x, y: head.y + this.dir.y };
 
-    // Check for collisions (walls or self)
+    // Wrap the snake around the screen
+    if (newHead.x < 0){
+      newHead.x = cols -1;
+    } 
+    else if (newHead.x >= cols){ 
+      newHead.x = 0;
+    }
+    if (newHead.y < 0) {
+      newHead.y = rows - 1;
+    }
+    else if (newHead.y >= rows) {
+      newHead.y = 0;
+    }
+
+    // Check the collisions with itself
     if (
       newHead.x < 0 || newHead.x >= cols ||
       newHead.y < 0 || newHead.y >= rows ||
       grid[newHead.y][newHead.x] === 1
     ) {
+
       gameOver = true;
       return;
     }

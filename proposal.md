@@ -7,6 +7,8 @@ This a snake game, which has levels after completing the every requirement requi
 - Make levels 
 - change into better background according to each levels
 - create a sound after each time the snake eat the food
+- create a bg music
+- start screen
 
 ## Nice to Have
 
