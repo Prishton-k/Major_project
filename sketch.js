@@ -5,7 +5,7 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
-
+let gameState = "start";
 let grid;
 let gridSize = 20; // Size of each grid cell
 let cols, rows;
@@ -55,6 +55,16 @@ function draw() {
   fill(0);
   textSize(16);
   text("Score: " + score, 10,20);
+
+  if (gameState === "start"){
+    fill(0);
+    textSize(32);
+    textAlign(CENTER, CENTER);
+    textAlign("Sanke Game",width/2 , height/3);
+    textSize(16);
+    text("Press Enter to Start", width/2, height/2);
+    return;
+  }
 }
 
 

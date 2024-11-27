@@ -4,11 +4,13 @@ This a snake game, which has levels after completing the every requirement requi
 
 ## Needs to Have
 
-- Make levels 
+- Make levels
+- add obstacles 
+- make a game idea button for giving idea of how the game runs
 - change into better background according to each levels
 - create a sound after each time the snake eat the food
 - create a bg music
-- start screen
+- starting screen
 
 ## Nice to Have
 
