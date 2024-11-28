@@ -5,7 +5,7 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
-let gameState = "start";
+let gameState = "start"; // Start screen state
 let grid;
 let gridSize = 20; // Size of each grid cell
 let cols, rows;
@@ -14,7 +14,6 @@ let food;
 let score = 0;
 let gameOver = false;
 let foodColor; // This will store the random color of the food
-
 
 function setup() {
   createCanvas(400, 400);
@@ -27,11 +26,20 @@ function setup() {
 
   // Place initial food
   placeFood();
-
 }
 
-
 function draw() {
+  if (gameState === "start") {
+    background(0);
+    fill(255);
+    textSize(32);
+    textAlign(CENTER, CENTER);
+    text("Snake Game", width / 2, height / 3);
+    textSize(16);
+    text("Press Enter to Start", width / 2, height / 2);
+    return;
+  }
+
   if (gameOver) {
     background(0);
     fill(255, 0, 0);
@@ -54,26 +62,15 @@ function draw() {
 
   fill(0);
   textSize(16);
-  text("Score: " + score, 10,20);
-
-  if (gameState === "start"){
-    fill(0);
-    textSize(32);
-    textAlign(CENTER, CENTER);
-    textAlign("Sanke Game",width/2 , height/3);
-    textSize(16);
-    text("Press Enter to Start", width/2, height/2);
-    return;
-  }
+  text("Score: " + score, 10, 20);
 }
-
 
 function placeFood() {
   let emptyCells = [];
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       // Track empty cells
-      if (grid[r][c] === 0 && emptyCells.push({x :c , y :r})){} 
+      if (grid[r][c] === 0 && emptyCells.push({x: c, y: r})) {}
     }
   }
 
@@ -92,33 +89,40 @@ function placeFood() {
 }
 
 function keyPressed() {
-  if (keyCode === UP_ARROW && snake.dir.y === 0) {
-    snake.setDir(0, -1);
-  } 
-  else if (keyCode === DOWN_ARROW && snake.dir.y === 0) {
-    snake.setDir(0, 1);
-  } 
-  else if (keyCode === LEFT_ARROW && snake.dir.x === 0) {
-    snake.setDir(-1, 0);
-  } 
-  else if (keyCode === RIGHT_ARROW && snake.dir.x === 0) {
-    snake.setDir(1, 0);
+  if (gameState === "start" && keyCode === ENTER) {
+    gameState = "play"; // Change to play state when "Enter" is pressed
+    return;
   }
-  // W, A, S, D keys
-  else if ((key === 'W' || key === 'w') && snake.dir.y === 0) {
-    snake.setDir(0, -1);
-  } 
-  else if ((key === 'S' || key === 's') && snake.dir.y === 0) {
-    snake.setDir(0, 1);
-  } 
-  else if ((key === 'A' || key === 'a') && snake.dir.x === 0) {
-    snake.setDir(-1, 0);
-  } 
-  else if ((key === 'D' || key === 'd') && snake.dir.x === 0) {
-    snake.setDir(1, 0);
-  } 
-  else if (key === 'R' || key === 'r') {
-    restartGame();
+
+  if (gameState === "play") {
+    if (keyCode === UP_ARROW && snake.dir.y === 0) {
+      snake.setDir(0, -1);
+    } 
+    else if (keyCode === DOWN_ARROW && snake.dir.y === 0) {
+      snake.setDir(0, 1);
+    } 
+    else if (keyCode === LEFT_ARROW && snake.dir.x === 0) {
+      snake.setDir(-1, 0);
+    } 
+    else if (keyCode === RIGHT_ARROW && snake.dir.x === 0) {
+      snake.setDir(1, 0);
+    }
+    // W, A, S, D keys
+    else if ((key === 'W' || key === 'w') && snake.dir.y === 0) {
+      snake.setDir(0, -1);
+    } 
+    else if ((key === 'S' || key === 's') && snake.dir.y === 0) {
+      snake.setDir(0, 1);
+    } 
+    else if ((key === 'A' || key === 'a') && snake.dir.x === 0) {
+      snake.setDir(-1, 0);
+    } 
+    else if ((key === 'D' || key === 'd') && snake.dir.x === 0) {
+      snake.setDir(1, 0);
+    } 
+    else if (key === 'R' || key === 'r') {
+      restartGame();
+    }
   }
 }
 
@@ -129,6 +133,7 @@ function restartGame() {
   gameOver = false;
   frameRate(10);
   placeFood(); // Re-place food
+  gameState = "play"; // Start the game automatically after restarting
 }
 
 class Snake {
@@ -139,7 +144,7 @@ class Snake {
     // Mark the initial snake position on the grid
     grid[this.body[0].y][this.body[0].x] = 1;
   }
-  
+
   setDir(x, y) {
     this.dir = { x, y };
   }
@@ -172,7 +177,6 @@ class Snake {
       newHead.y < 0 || newHead.y >= rows ||
       grid[newHead.y][newHead.x] === 1
     ) {
-
       gameOver = true;
       return;
     }
