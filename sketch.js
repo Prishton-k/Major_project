@@ -83,7 +83,7 @@ function draw() {
   // Display score
   fill(0);
   textSize(16);
-  text("Score: " + score, 10, 20);
+  text("Score: " + score, 30, 20);
 }
 
 function drawStartScreen() {
@@ -100,7 +100,9 @@ function drawStartScreen() {
     fill(255, random(150, 255));
     ellipse(star.x, star.y, star.size);
     star.y += star.speed;
-    if (star.y > height) star.y = 0; // Reset star position
+    if (star.y > height) {
+      star.y = 0; // Reset star position
+    }
   }
 
   // Title
@@ -114,8 +116,11 @@ function drawStartScreen() {
   fill(255, fade);
   text("Press Enter to Start", width / 2, height / 2);
   fade += fadeDirection;
-  if (fade <= 100 || fade >= 255) fadeDirection *= -1; // Reverse fade direction
+  if (fade <= 100 || fade >= 255) {
+    fadeDirection *= -1; // Reverse fade direction
+  }
 }
+
 
 function drawGameOverScreen() {
   background(30, 0, 0);
@@ -151,11 +156,14 @@ function keyPressed() {
     // Arrow key movement
     if (keyCode === UP_ARROW && snake.dir.y === 0) {
       snake.setDir(0, -1);
-    } else if (keyCode === DOWN_ARROW && snake.dir.y === 0) {
+    } 
+    else if (keyCode === DOWN_ARROW && snake.dir.y === 0) {
       snake.setDir(0, 1);
-    } else if (keyCode === LEFT_ARROW && snake.dir.x === 0) {
+    } 
+    else if (keyCode === LEFT_ARROW && snake.dir.x === 0) {
       snake.setDir(-1, 0);
-    } else if (keyCode === RIGHT_ARROW && snake.dir.x === 0) {
+    } 
+    else if (keyCode === RIGHT_ARROW && snake.dir.x === 0) {
       snake.setDir(1, 0);
     }
   }
@@ -173,16 +181,26 @@ class Snake {
   }
 
   update() {
-    if (this.dir.x === 0 && this.dir.y === 0) return; // No movement initially
-
+    if (this.dir.x === 0 && this.dir.y === 0){
+      return; // No movement initially
+    }
     let head = this.body[this.body.length - 1];
     let newHead = { x: head.x + this.dir.x, y: head.y + this.dir.y };
 
     // Wrap around screen
-    if (newHead.x < 0) newHead.x = cols - 1;
-    else if (newHead.x >= cols) newHead.x = 0;
-    if (newHead.y < 0) newHead.y = rows - 1;
-    else if (newHead.y >= rows) newHead.y = 0;
+    if (newHead.x < 0){ 
+      newHead.x = cols - 1;
+    }
+    else if(newHead.x >= cols){
+      newHead.x = 0;
+    }
+    
+    if (newHead.y < 0) {
+      newHead.y = rows - 1;
+    }
+    else if (newHead.y >= rows) {
+      newHead.y = 0;
+    }
 
     // Check collision with itself
     if (grid[newHead.y][newHead.x] === 1) {
@@ -197,7 +215,8 @@ class Snake {
     if (grid[newHead.y][newHead.x] === 2) {
       score++;
       placeFood();
-    } else {
+    } 
+    else {
       // Remove tail if no food eaten
       let tail = this.body.shift();
       grid[tail.y][tail.x] = 0;
@@ -220,7 +239,9 @@ function placeFood() {
   let emptyCells = [];
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      if (grid[r][c] === 0) emptyCells.push({ x: c, y: r });
+      if (grid[r][c] === 0) {
+        emptyCells.push({ x: c, y: r });
+      }
     }
   }
 
@@ -229,7 +250,8 @@ function placeFood() {
     food = spot;
     grid[food.y][food.x] = 2;
     foodColor = color(random(255), random(255), random(255));
-  } else {
+  } 
+  else {
     gameState = "gameOver"; // No space left for food
   }
 }
