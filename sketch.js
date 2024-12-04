@@ -1,10 +1,3 @@
-// Snake game upgraded version
-// Digdarshan KC
-// Date
-//
-// Extra for Experts:
-// - describe what you did to take this project "above and beyond"
-
 let gameState = "start"; // Initial state
 let grid;
 let gridSize = 20; // Size of each grid cell
@@ -13,10 +6,9 @@ let snake;
 let food;
 let score = 0;
 let foodColor;
-let fade = 255; // For animated text on the start screen
-let fadeDirection = -5; // Direction of fade
-let stars = []; // Stars for the start screen
 let restartButton; // Restart button
+let classicButton; // Classic button
+let adventureButton; // Adventure button
 
 function setup() {
   createCanvas(400, 400);
@@ -27,35 +19,56 @@ function setup() {
   // Initialize grid and snake
   grid = Array.from({ length: rows }, () => Array(cols).fill(0));
   snake = new Snake();
-
-  // Place initial food
   placeFood();
 
-  // Create stars for the start screen
-  for (let i = 0; i < 100; i++) {
-    stars.push({
-      x: random(width),
-      y: random(height),
-      size: random(2, 5),
-      speed: random(0.5, 1.5),
-    });
-  }
+  // Create "Classic" button for start screen
+  classicButton = createButton("Classic");
+  classicButton.position(width / 2 - 40, height / 2 + 50);
+  classicButton.size(80, 40);
+  classicButton.style("font-size", "16px");
+  classicButton.style("background-color", "#ffcc66");
+  classicButton.style("color", "black");
+  classicButton.style("border", "none");
+  classicButton.style("border-radius", "5px");
+  classicButton.mousePressed(() => {
+    gameState = "play"; // Start the game
+    classicButton.hide(); // Hide the button
+    adventureButton.hide(); // Hide the adventure button when classic is clicked
+  });
 
-  // Create the restart button but hide it initially
-  restartButton = createButton('Restart');
-  restartButton.position(width / 2 - 40, height / 2 + 60);
+  // Create "Adventure" button for start screen
+  adventureButton = createButton("Adventure");
+  adventureButton.position(width / 2 - 40, height / 2 + 100); // Positioned below "Classic" button
+  adventureButton.size(80, 40);
+  adventureButton.style("font-size", "16px");
+  adventureButton.style("background-color", "#66cc66");
+  adventureButton.style("color", "black");
+  adventureButton.style("border", "none");
+  adventureButton.style("border-radius", "5px");
+  adventureButton.mousePressed(() => {
+    gameState = "play"; // Start the game
+    adventureButton.hide(); // Hide the button
+    classicButton.hide(); // Hide the classic button when adventure is clicked
+  });
+
+  // Create the "Continue" button for game over screen
+  restartButton = createButton("Continue");
+  restartButton.position(width / 2 - 40, height / 2 + 50);
   restartButton.size(80, 40);
-  restartButton.style('font-size', '16px');
-  restartButton.style('background-color', '#ff4d4d');
-  restartButton.style('color', 'white');
-  restartButton.style('border', 'none');
-  restartButton.style('border-radius', '5px');
+  restartButton.style("font-size", "16px");
+  restartButton.style("background-color", "#ffcc66");
+  restartButton.style("color", "black");
+  restartButton.style("border", "none");
+  restartButton.style("border-radius", "5px");
   restartButton.hide();
   restartButton.mousePressed(() => {
     gameState = "start"; // Return to start screen
-    restartButton.hide(); // Hide the button
+    restartButton.hide();
     score = 0; // Reset score
     setup(); // Reinitialize the game
+    // Show the classic and adventure buttons again
+    classicButton.show();
+    adventureButton.show();
   });
 }
 
@@ -71,7 +84,48 @@ function draw() {
   }
 
   // Main gameplay
-  background(170);
+  drawPlayScreen();
+}
+
+function drawStartScreen() {
+  background(30, 50, 40); // Dark green background
+
+  // Title
+  textAlign(CENTER, CENTER);
+  textSize(48);
+  fill(255);
+  text("Snake Game", width / 2, height / 3);
+
+  // Instructions
+  textSize(20);
+  fill(200);
+  text("Select 'Classic' or 'Adventure' to start", width / 2, height / 2 - 20);
+}
+
+function drawGameOverScreen() {
+  background(30, 50, 40); // Dark green background
+
+  // Game over pop-up
+  fill(200, 100, 50); // Light brown
+  rect(width / 2 - 100, height / 2 - 80, 200, 160, 10);
+
+  textAlign(CENTER, CENTER);
+  textSize(32);
+  fill(255);
+  text("Game Over", width / 2, height / 2 - 40);
+
+  textSize(24);
+  fill(255);
+  text(`Score: ${score}`, width / 2, height / 2);
+
+  restartButton.show(); // Show "Continue" button
+}
+
+function drawPlayScreen() {
+  // Dark green gameplay background
+  background(30, 50, 40);
+
+  // Snake and food
   snake.update();
   snake.show();
 
@@ -81,77 +135,12 @@ function draw() {
   ellipse(food.x * gridSize + gridSize / 2, food.y * gridSize + gridSize / 2, gridSize, gridSize);
 
   // Display score
-  fill(0);
+  fill(255);
   textSize(16);
   text("Score: " + score, 30, 20);
 }
 
-function drawStartScreen() {
-  // Gradient background
-  for (let y = 0; y < height; y++) {
-    let gradient = lerpColor(color(30, 50, 180), color(255, 100, 200), y / height);
-    stroke(gradient);
-    line(0, y, width, y);
-  }
-
-  // Animated stars
-  noStroke();
-  for (let star of stars) {
-    fill(255, random(150, 255));
-    ellipse(star.x, star.y, star.size);
-    star.y += star.speed;
-    if (star.y > height) {
-      star.y = 0; // Reset star position
-    }
-  }
-
-  // Title
-  textAlign(CENTER, CENTER);
-  textSize(48);
-  fill(255);
-  text("Snake Game", width / 2, height / 3);
-
-  // Animated "Press Enter" text
-  textSize(20);
-  fill(255, fade);
-  text("Press Enter to Start", width / 2, height / 2);
-  fade += fadeDirection;
-  if (fade <= 100 || fade >= 255) {
-    fadeDirection *= -1; // Reverse fade direction
-  }
-}
-
-
-function drawGameOverScreen() {
-  background(30, 0, 0);
-
-  // Dripping blood effect
-  for (let y = 0; y < height; y += 30) {
-    fill(255, 0, 0, random(150, 255));
-    rect(0, y, width, 10);
-  }
-
-  // Pulsing skull
-  textAlign(CENTER, CENTER);
-  textSize(96 + sin(frameCount * 0.1) * 5); // Pulsing effect
-  fill(255);
-  text("💀", width / 2, height / 3);
-
-  // Final score display
-  textSize(32);
-  fill(255, 200, 200);
-  text(`Your Score: ${score}`, width / 2, height / 2);
-
-  // Show the restart button
-  restartButton.show();
-}
-
 function keyPressed() {
-  if (gameState === "start" && keyCode === ENTER) {
-    gameState = "play"; // Start the game
-    restartButton.hide(); // Ensure the button is hidden during gameplay
-  }
-
   if (gameState === "play") {
     // Arrow key movement
     if (keyCode === UP_ARROW && snake.dir.y === 0) {
@@ -181,23 +170,23 @@ class Snake {
   }
 
   update() {
-    if (this.dir.x === 0 && this.dir.y === 0){
+    if (this.dir.x === 0 && this.dir.y === 0) {
       return; // No movement initially
     }
     let head = this.body[this.body.length - 1];
     let newHead = { x: head.x + this.dir.x, y: head.y + this.dir.y };
 
     // Wrap around screen
-    if (newHead.x < 0){ 
+    if (newHead.x < 0) {
       newHead.x = cols - 1;
-    }
-    else if(newHead.x >= cols){
+    } 
+    else if (newHead.x >= cols) {
       newHead.x = 0;
     }
-    
+
     if (newHead.y < 0) {
       newHead.y = rows - 1;
-    }
+    } 
     else if (newHead.y >= rows) {
       newHead.y = 0;
     }
@@ -255,6 +244,3 @@ function placeFood() {
     gameState = "gameOver"; // No space left for food
   }
 }
-
-
-
