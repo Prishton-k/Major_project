@@ -9,6 +9,12 @@ let foodColor;
 let restartButton; // Restart button
 let classicButton; // Classic button
 let adventureButton; // Adventure button
+let bgSound; // Background sound
+
+function preload() {
+  // Load the background sound
+  bgSound = loadSound("bg.mp3");
+}
 
 function setup() {
   createCanvas(400, 400);
@@ -21,9 +27,9 @@ function setup() {
   snake = new Snake();
   placeFood();
 
-  // Create "Classic" button for start screen
+  // Create "Classic" button
   classicButton = createButton("Classic");
-  classicButton.position(width / 2 - 40, height / 2 + 50);
+  classicButton.position(width / 2 - 80, height / 2 + 50);
   classicButton.size(80, 40);
   classicButton.style("font-size", "16px");
   classicButton.style("background-color", "#ffcc66");
@@ -32,23 +38,29 @@ function setup() {
   classicButton.style("border-radius", "5px");
   classicButton.mousePressed(() => {
     gameState = "play"; // Start the game
-    classicButton.hide(); // Hide the button
-    adventureButton.hide(); // Hide the adventure button when classic is clicked
+    classicButton.hide(); // Hide both buttons
+    adventureButton.hide();
+    if (!bgSound.isPlaying()) {
+      bgSound.loop(); // Play sound in a loop
+    }
   });
 
-  // Create "Adventure" button for start screen
+  // Create "Adventure" button
   adventureButton = createButton("Adventure");
-  adventureButton.position(width / 2 - 40, height / 2 + 100); // Positioned below "Classic" button
+  adventureButton.position(width / 2, height / 2 + 50);
   adventureButton.size(80, 40);
   adventureButton.style("font-size", "16px");
-  adventureButton.style("background-color", "#66cc66");
+  adventureButton.style("background-color", "#ff9966");
   adventureButton.style("color", "black");
   adventureButton.style("border", "none");
   adventureButton.style("border-radius", "5px");
   adventureButton.mousePressed(() => {
     gameState = "play"; // Start the game
-    adventureButton.hide(); // Hide the button
-    classicButton.hide(); // Hide the classic button when adventure is clicked
+    classicButton.hide(); // Hide both buttons
+    adventureButton.hide();
+    if (!bgSound.isPlaying()) {
+      bgSound.loop(); // Play sound in a loop
+    }
   });
 
   // Create the "Continue" button for game over screen
@@ -65,10 +77,8 @@ function setup() {
     gameState = "start"; // Return to start screen
     restartButton.hide();
     score = 0; // Reset score
+    bgSound.stop(); // Stop background sound
     setup(); // Reinitialize the game
-    // Show the classic and adventure buttons again
-    classicButton.show();
-    adventureButton.show();
   });
 }
 
@@ -186,7 +196,7 @@ class Snake {
 
     if (newHead.y < 0) {
       newHead.y = rows - 1;
-    } 
+    }
     else if (newHead.y >= rows) {
       newHead.y = 0;
     }
