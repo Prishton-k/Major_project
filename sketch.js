@@ -1,10 +1,3 @@
-// Snake game upgraded version
-// Digdarshan KC
-// Date
-//
-// Extra for Experts:
-// - describe what you did to take this project "above and beyond"
-
 let gameState = "start"; // Initial state
 let grid;
 let gridSize = 20; // Size of each grid cell
@@ -12,10 +5,10 @@ let cols, rows;
 let snake;
 let food;
 let score = 0;
+let level = 1; // Game level
 let foodColor;
-let restartButton; // Restart button
-let classicButton; // Classic button
-let adventureButton; // Adventure button
+let obstacles = []; // Obstacles for Level 2
+let restartButton, classicButton, adventureButton, infoButton; // UI buttons
 
 function setup() {
   createCanvas(400, 400);
@@ -28,55 +21,8 @@ function setup() {
   snake = new Snake();
   placeFood();
 
-  // Create "Classic" button for start screen
-  classicButton = createButton("Classic");
-  classicButton.position(width / 2 - 40, height / 2 + 50);
-  classicButton.size(80, 40);
-  classicButton.style("font-size", "16px");
-  classicButton.style("background-color", "#ffcc66");
-  classicButton.style("color", "black");
-  classicButton.style("border", "none");
-  classicButton.style("border-radius", "5px");
-  classicButton.mousePressed(() => {
-    gameState = "play"; // Start the game
-    classicButton.hide(); // Hide the button
-    adventureButton.hide(); // Hide the adventure button when classic is clicked
-  });
-
-  // Create "Adventure" button for start screen
-  adventureButton = createButton("Adventure");
-  adventureButton.position(width / 2 - 40, height / 2 + 100); // Positioned below "Classic" button
-  adventureButton.size(80, 40);
-  adventureButton.style("font-size", "16px");
-  adventureButton.style("background-color", "#66cc66");
-  adventureButton.style("color", "black");
-  adventureButton.style("border", "none");
-  adventureButton.style("border-radius", "5px");
-  adventureButton.mousePressed(() => {
-    gameState = "play"; // Start the game
-    adventureButton.hide(); // Hide the button
-    classicButton.hide(); // Hide the classic button when adventure is clicked
-  });
-
-  // Create the "Continue" button for game over screen
-  restartButton = createButton("Continue");
-  restartButton.position(width / 2 - 40, height / 2 + 50);
-  restartButton.size(80, 40);
-  restartButton.style("font-size", "16px");
-  restartButton.style("background-color", "#ffcc66");
-  restartButton.style("color", "black");
-  restartButton.style("border", "none");
-  restartButton.style("border-radius", "5px");
-  restartButton.hide();
-  restartButton.mousePressed(() => {
-    gameState = "start"; // Return to start screen
-    restartButton.hide();
-    score = 0; // Reset score
-    setup(); // Reinitialize the game
-    // Show the classic and adventure buttons again
-    classicButton.show();
-    adventureButton.show();
-  });
+  // Create buttons for start screen
+  setupButtons();
 }
 
 function draw() {
@@ -90,49 +36,100 @@ function draw() {
     return;
   }
 
+  if (gameState === "levelUp") {
+    drawLevelUpScreen();
+    return;
+  }
+
   // Main gameplay
   drawPlayScreen();
 }
 
-function drawStartScreen() {
-  background(30, 50, 40); // Dark green background
+function setupButtons() {
+  // "Classic" button
+  classicButton = createButton("Classic");
+  classicButton.position(width / 2 - 40, height / 2 + 50);
+  classicButton.size(80, 40);
+  styleButton(classicButton, "#ffcc66");
+  classicButton.mousePressed(() => {
+    gameState = "play"; // Start classic mode
+    hideButtons();
+  });
 
-  // Title
+  // "Adventure" button
+  adventureButton = createButton("Adventure");
+  adventureButton.position(width / 2 - 40, height / 2 + 100);
+  adventureButton.size(80, 40);
+  styleButton(adventureButton, "#66cc66");
+  adventureButton.mousePressed(() => {
+    gameState = "play";
+    level = 1; // Start Level 1
+    hideButtons();
+  });
+
+  // "Info" button
+  infoButton = createButton("?");
+  infoButton.position(width - 50, 20);
+  infoButton.size(40, 40);
+  styleButton(infoButton, "white", "20px", "2px solid black", "20px");
+  infoButton.mousePressed(() => {
+    alert(
+      "How to Play:\n" +
+      "- Use arrow keys to move the snake.\n" +
+      "- Eat food to grow and earn points.\n" +
+      "- Classic: No levels, free play.\n" +
+      "- Adventure: Clear levels with increasing difficulty!"
+    );
+  });
+
+  // "Continue" button for game over
+  restartButton = createButton("Continue");
+  restartButton.position(width / 2 - 40, height / 2 + 50);
+  restartButton.size(80, 40);
+  styleButton(restartButton, "#ffcc66");
+  restartButton.hide();
+  restartButton.mousePressed(() => {
+    gameState = "start"; // Return to start screen
+    resetGame();
+  });
+}
+
+function drawStartScreen() {
+  background(30, 50, 40); // Dark green
   textAlign(CENTER, CENTER);
   textSize(48);
   fill(255);
   text("Snake Game", width / 2, height / 3);
-
-  // Instructions
   textSize(20);
   fill(200);
   text("Select 'Classic' or 'Adventure' to start", width / 2, height / 2 - 20);
 }
 
 function drawGameOverScreen() {
-  background(30, 50, 40); // Dark green background
-
-  // Game over pop-up
-  fill(200, 100, 50); // Light brown
+  background(30, 50, 40); // Dark green
+  fill(200, 100, 50);
   rect(width / 2 - 100, height / 2 - 80, 200, 160, 10);
-
   textAlign(CENTER, CENTER);
   textSize(32);
   fill(255);
   text("Game Over", width / 2, height / 2 - 40);
+  textSize(24);
+  text(`Score: ${score}`, width / 2, height / 2);
+  restartButton.show();
+}
 
+function drawLevelUpScreen() {
+  background(30, 50, 40); // Dark green
+  textAlign(CENTER, CENTER);
   textSize(24);
   fill(255);
-  text(`Score: ${score}`, width / 2, height / 2);
-
-  restartButton.show(); // Show "Continue" button
+  text(`Congratulations! You completed Level ${level - 1}!`, width / 2, height / 3);
+  textSize(18);
+  text("Press 'G' to start the next level.", width / 2, height / 2);
 }
 
 function drawPlayScreen() {
-  // Dark green gameplay background
-  background(30, 50, 40);
-
-  // Snake and food
+  background(30, 50, 40); // Dark green
   snake.update();
   snake.show();
 
@@ -141,15 +138,19 @@ function drawPlayScreen() {
   fill(foodColor);
   ellipse(food.x * gridSize + gridSize / 2, food.y * gridSize + gridSize / 2, gridSize, gridSize);
 
-  // Display score
+  // Draw obstacles in Level 2
+  if (level === 2) {
+    drawObstacles();
+  }
+
   fill(255);
   textSize(16);
   text("Score: " + score, 30, 20);
+  text("Level: " + level, 30, 40);
 }
 
 function keyPressed() {
   if (gameState === "play") {
-    // Arrow key movement
     if (keyCode === UP_ARROW && snake.dir.y === 0) {
       snake.setDir(0, -1);
     } else if (keyCode === DOWN_ARROW && snake.dir.y === 0) {
@@ -160,88 +161,124 @@ function keyPressed() {
       snake.setDir(1, 0);
     }
   }
+
+  // Progress to next level
+  if (gameState === "levelUp" && key === "g") {
+    startNextLevel();
+  }
 }
 
-class Snake {
-  constructor() {
-    this.body = [{ x: floor(cols / 2), y: floor(rows / 2) }];
-    this.dir = { x: 0, y: 0 };
-    grid[this.body[0].y][this.body[0].x] = 1; // Mark snake's position
-  }
+function Snake() {
+  this.body = [{ x: floor(cols / 2), y: floor(rows / 2) }];
+  this.dir = { x: 0, y: 0 };
 
-  setDir(x, y) {
-    this.dir = { x, y };
-  }
+  this.setDir = (x, y) => (this.dir = { x, y });
 
-  update() {
-    if (this.dir.x === 0 && this.dir.y === 0) {
-      return; // No movement initially
-    }
+  this.update = () => {
+    if (this.dir.x === 0 && this.dir.y === 0) return;
+
     let head = this.body[this.body.length - 1];
     let newHead = { x: head.x + this.dir.x, y: head.y + this.dir.y };
 
-    // Wrap around screen
-    if (newHead.x < 0) {
-      newHead.x = cols - 1;
-    } else if (newHead.x >= cols) {
-      newHead.x = 0;
-    }
+    // Wrap around the screen
+    newHead.x = (newHead.x + cols) % cols;
+    newHead.y = (newHead.y + rows) % rows;
 
-    if (newHead.y < 0) {
-      newHead.y = rows - 1;
-    } else if (newHead.y >= rows) {
-      newHead.y = 0;
-    }
-
-    // Check collision with itself
-    if (grid[newHead.y][newHead.x] === 1) {
-      gameState = "gameOver"; // Trigger game over
+    // Collision detection
+    if (grid[newHead.y][newHead.x] === 1 || (level === 2 && isObstacle(newHead))) {
+      gameState = "gameOver";
       return;
     }
 
-    // Add new head to the body
     this.body.push(newHead);
 
-    // Check if food is eaten
     if (grid[newHead.y][newHead.x] === 2) {
       score++;
+      if (level === 1 && score >= 15) {
+        gameState = "levelUp";
+        return;
+      }
       placeFood();
     } else {
-      // Remove tail if no food eaten
       let tail = this.body.shift();
       grid[tail.y][tail.x] = 0;
     }
 
-    // Mark new head position
     grid[newHead.y][newHead.x] = 1;
-  }
+  };
 
-  show() {
+  this.show = () => {
     for (let segment of this.body) {
-      stroke(255);
       fill(0);
+      stroke(255);
       rect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
     }
-  }
+  };
 }
 
 function placeFood() {
   let emptyCells = [];
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      if (grid[r][c] === 0) {
+      if (grid[r][c] === 0 && !isObstacle({ x: c, y: r })) {
         emptyCells.push({ x: c, y: r });
       }
     }
   }
 
-  if (emptyCells.length > 0) {
-    let spot = random(emptyCells);
-    food = spot;
-    grid[food.y][food.x] = 2;
-    foodColor = color(random(255), random(255), random(255));
-  } else {
-    gameState = "gameOver"; // No space left for food
+  let spot = random(emptyCells);
+  food = spot;
+  grid[food.y][food.x] = 2;
+  foodColor = color(random(255), random(255), random(255));
+}
+
+function startNextLevel() {
+  level = 2;
+  gameState = "play";
+  resetGame();
+  setupObstacles();
+}
+
+function setupObstacles() {
+  obstacles = [];
+  for (let i = 0; i < 10; i++) {
+    let x = floor(random(cols));
+    let y = floor(random(rows));
+    if (grid[y][x] === 0) {
+      obstacles.push({ x, y });
+      grid[y][x] = -1;
+    }
   }
 }
 
+function drawObstacles() {
+  fill(150, 0, 0);
+  for (let obs of obstacles) {
+    rect(obs.x * gridSize, obs.y * gridSize, gridSize, gridSize);
+  }
+}
+
+function isObstacle(cell) {
+  return obstacles.some(obs => obs.x === cell.x && obs.y === cell.y);
+}
+
+function resetGame() {
+  grid = Array.from({ length: rows }, () => Array(cols).fill(0));
+  snake = new Snake();
+  placeFood();
+  score = 0;
+}
+
+function styleButton(button, bgColor, fontSize = "16px", border = "none", borderRadius = "5px") {
+  button.style("background-color", bgColor);
+  button.style("color", "black");
+  button.style("border", border);
+  button.style("border-radius", borderRadius);
+  button.style("font-size", fontSize);
+}
+
+function hideButtons() {
+  classicButton.hide();
+  adventureButton.hide();
+  infoButton.hide();
+}
