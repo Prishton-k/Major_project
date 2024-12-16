@@ -114,7 +114,7 @@ function drawLevelUpScreen() {
   textAlign(CENTER, CENTER);
   textSize(24);
   fill(255);
-  text(`Level ${level - 1} Complete!`, width / 2, height / 3);
+  text(`Level ${level - 2} Complete!`, width / 2, height / 3);
   textSize(18);
   text("Press 'G' to start the next level.", width / 2, height / 2);
 }
