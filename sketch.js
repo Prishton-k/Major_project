@@ -21,11 +21,14 @@ function setup() {
 function draw() {
   if (gameState === "start") {
     drawStartScreen();
-  } else if (gameState === "gameOver") {
+  } 
+  else if (gameState === "gameOver") {
     drawGameOverScreen();
-  } else if (gameState === "levelUp") {
+  }
+  else if (gameState === "levelUp") {
     drawLevelUpScreen();
-  } else if (gameState === "play") {
+  }
+  else if (gameState === "play") {
     drawPlayScreen();
   }
 }
@@ -39,7 +42,6 @@ function setupButtons() {
   classicButton.mousePressed(() => {
     gameState = "play";
     classicMode = true; // Set the game mode to Classic
-    level = 1;
     hideButtons();
     resetGame();
   });
@@ -62,6 +64,8 @@ function setupButtons() {
   infoButton.position(width - 50, 20);
   infoButton.size(40, 40);
   styleButton(infoButton, "white", "20px", "2px solid black", "20px");
+  
+  //Helped by uncle
   infoButton.mousePressed(() => {
     alert(
       "How to Play:\n" +
@@ -114,7 +118,7 @@ function drawLevelUpScreen() {
   textAlign(CENTER, CENTER);
   textSize(24);
   fill(255);
-  text(`Level ${level - 2} Complete!`, width / 2, height / 3);
+  text(`Level ${1} Complete!`, width / 2, height / 3);
   textSize(18);
   text("Press 'G' to start the next level.", width / 2, height / 2);
 }
@@ -122,7 +126,8 @@ function drawLevelUpScreen() {
 function drawPlayScreen() {
   if (level > 1) {
     drawSandTexture();  // Draw the sand texture when level > 1
-  } else {
+  } 
+  else {
     background(30, 50, 40);  // Default background for level 1
   }
   
@@ -146,6 +151,7 @@ function drawPlayScreen() {
   text(`Level: ${level}`, 30, 40);
 }
 
+// Took help from chat gpt
 function drawSandTexture() {
   // Create a grainy sand effect
   for (let y = 0; y < height; y += gridSize) {
@@ -162,27 +168,42 @@ function drawSandTexture() {
 
 function keyPressed() {
   if (gameState === "play") {
-    if (keyCode === UP_ARROW && snake.dir.y === 0) snake.setDir(0, -1);
-    if (keyCode === DOWN_ARROW && snake.dir.y === 0) snake.setDir(0, 1);
-    if (keyCode === LEFT_ARROW && snake.dir.x === 0) snake.setDir(-1, 0);
-    if (keyCode === RIGHT_ARROW && snake.dir.x === 0) snake.setDir(1, 0);
+    if (keyCode === UP_ARROW && snake.dir.y === 0){
+      snake.setDir(0, -1);
+    }
+    if (keyCode === DOWN_ARROW && snake.dir.y === 0){
+      snake.setDir(0, 1);
+    }
+    if (keyCode === LEFT_ARROW && snake.dir.x === 0) {
+      snake.setDir(-1, 0);
+    }
+    if (keyCode === RIGHT_ARROW && snake.dir.x === 0){
+      snake.setDir(1, 0);
+    }
   }
 
-  if (gameState === "levelUp" && key === "g") startNextLevel();
+  if (gameState === "levelUp" && key === "g"){
+    startNextLevel();
+  }
 }
 
+// Help from gpt
 function Snake() {
   this.body = [{ x: floor(cols / 2), y: floor(rows / 2) }];
   this.dir = { x: 0, y: 0 };
 
-  this.setDir = (x, y) => (this.dir = { x, y });
+  this.setDir = (x, y) => this.dir = { x, y };
 
   this.update = () => {
-    if (this.dir.x === 0 && this.dir.y === 0) return;
+    if (this.dir.x === 0 && this.dir.y === 0){
+      return;
+    }
 
     let head = this.body[this.body.length - 1];
     let newHead = { x: head.x + this.dir.x, y: head.y + this.dir.y };
 
+   
+   
     // Wrap around the screen
     newHead.x = (newHead.x + cols) % cols;
     newHead.y = (newHead.y + rows) % rows;
@@ -190,7 +211,7 @@ function Snake() {
     // Check for collisions
     if (
       this.body.some((part) => part.x === newHead.x && part.y === newHead.y) ||
-      (!classicMode && level > 1 && obstacles.some((obs) => obs.x === newHead.x && obs.y === newHead.y))
+       !classicMode && level > 1 && obstacles.some((obs) => obs.x === newHead.x && obs.y === newHead.y)
     ) {
       gameState = "gameOver";
       return;
@@ -200,9 +221,12 @@ function Snake() {
 
     if (newHead.x === food.x && newHead.y === food.y) {
       score++;
-      if (!classicMode && score >= 20) gameState = "levelUp"; // Adventure mode levels up after 20 points
+      if (!classicMode && score >= 15) {
+        gameState = "levelUp"; // Adventure mode levels up after 20 points
+      }
       placeFood();
-    } else {
+    } 
+    else {
       this.body.shift();
     }
   };
@@ -238,7 +262,7 @@ function setupObstacles() {
     let y = floor(random(rows));
     
     // Ensure obstacles don't overlap with snake's body or food position
-    while (snake.body.some((seg) => seg.x === x && seg.y === y) || (food && food.x === x && food.y === y)) {
+    while (snake.body.some((seg) => seg.x === x && seg.y === y) || food && food.x === x && food.y === y) {
       x = floor(random(cols));
       y = floor(random(rows));
     }
@@ -258,7 +282,9 @@ function drawObstacles() {
 function startNextLevel() {
   level++;
   resetGame();
-  if (!classicMode) setupObstacles();
+  if (!classicMode) {
+    setupObstacles();
+  }
   gameState = "play";
 }
 
@@ -266,7 +292,9 @@ function resetGame() {
   snake = new Snake();
   score = 0; // Adjust score for level continuation in Adventure mode
   placeFood();
-  if (!classicMode) setupObstacles();
+  if (!classicMode){ 
+    setupObstacles();
+  }
 }
 
 function styleButton(button, bgColor, fontSize = "16px", border = "none", borderRadius = "5px") {
