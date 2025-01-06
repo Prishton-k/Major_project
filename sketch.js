@@ -31,22 +31,20 @@ function setup() {
 }
 
 function draw() {
-  switch (gameState) {
-    case "start":
-      drawStartScreen();
-      break;
-    case "gameOver":
-      drawGameOverScreen();
-      break;
-    case "levelUp":
-      drawLevelUpScreen();
-      break;
-    case "congratulations":
-      drawCongratulationsScreen();
-      break;
-    case "play":
-      drawPlayScreen();
-      break;
+  if (gameState === "start") {
+    drawStartScreen();
+  } 
+  else if (gameState === "gameOver") {
+    drawGameOverScreen();
+  } 
+  else if (gameState === "levelUp") {
+    drawLevelUpScreen();
+  } 
+  else if (gameState === "congratulations") {
+    drawCongratulationsScreen();
+  } 
+  else if (gameState === "play") {
+    drawPlayScreen();
   }
 }
 
@@ -146,7 +144,7 @@ function drawGameOverScreen() {
   fill(255);
   text("Game Over", width / 2, height / 2 - 40);
   textSize(24);
-  text(`Score: ${score}`, width / 2, height / 2);
+  text("Score ${score}", width / 2, height / 2);
   restartButton.html("Continue");
   restartButton.show();
 }
@@ -156,7 +154,7 @@ function drawLevelUpScreen() {
   textAlign(CENTER, CENTER);
   textSize(24);
   fill(255);
-  text(`Level ${level} Complete!`, width / 2, height / 3);
+  text("Level ${1} Complete!", width / 2, height / 3);
   textSize(18);
   text("Starting next level in:", width / 2, height / 2 - 20);
 
@@ -164,13 +162,17 @@ function drawLevelUpScreen() {
     textSize(32);
     text(countdown, width / 2, height / 2 + 20);
 
-    if (frameCount % 60 === 0 && countdown > 0) {
+    if (frameCount % 50 === 0 && countdown > 0) {
       countdown--;
     }
+    
   }
 
   if (countdown <= 0) {
     startNextLevel();
+  }
+  if(countdown ===1){
+    level ==="2";
   }
 }
 
@@ -191,7 +193,8 @@ function drawCongratulationsScreen() {
 function drawPlayScreen() {
   if (level > 1) {
     drawSandTexture();
-  } else {
+  } 
+  else {
     background(30, 50, 40);
   }
   snake.update();
@@ -204,16 +207,24 @@ function drawPlayScreen() {
   }
   fill(255);
   textSize(16);
-  text(`Score: ${score}`, 30, 20);
-  text(`Level: ${level}`, 30, 40);
+  text("Score: ${score}", 30, 20);
+  text("Level: ${level}", 30, 40);
 }
 
 function keyPressed() {
   if (gameState === "play") {
-    if (keyCode === UP_ARROW && snake.dir.y === 0) snake.setDir(0, -1);
-    if (keyCode === DOWN_ARROW && snake.dir.y === 0) snake.setDir(0, 1);
-    if (keyCode === LEFT_ARROW && snake.dir.x === 0) snake.setDir(-1, 0);
-    if (keyCode === RIGHT_ARROW && snake.dir.x === 0) snake.setDir(1, 0);
+    if (keyCode === UP_ARROW && snake.dir.y === 0) {
+      snake.setDir(0, -1);
+    }
+    if (keyCode === DOWN_ARROW && snake.dir.y === 0) {
+      snake.setDir(0, 1);
+    }
+    if (keyCode === LEFT_ARROW && snake.dir.x === 0) {
+      snake.setDir(-1, 0);
+    }
+    if (keyCode === RIGHT_ARROW && snake.dir.x === 0) {
+      snake.setDir(1, 0);
+    }
   }
 }
 
@@ -228,7 +239,9 @@ class Snake {
   }
 
   update() {
-    if (this.dir.x === 0 && this.dir.y === 0) return;
+    if (this.dir.x === 0 && this.dir.y === 0) {
+      return;
+    }
 
     let head = this.body[this.body.length - 1];
     let newHead = { x: head.x + this.dir.x, y: head.y + this.dir.y };
@@ -239,8 +252,7 @@ class Snake {
 
     // Check for collisions
     if (
-      this.body.some((part) => part.x === newHead.x && part.y === newHead.y) ||
-      (!classicMode && level > 1 && obstacles.some((obs) => obs.x === newHead.x && obs.y === newHead.y))
+      this.body.some((part) => part.x === newHead.x && part.y === newHead.y ||!classicMode && level > 1 && obstacles.some((obs) => obs.x === newHead.x && obs.y === newHead.y))
     ) {
       gameState = "gameOver";
       return;
@@ -253,12 +265,14 @@ class Snake {
       score++;
       if (!classicMode && level === maxLevel && score >= 2) {
         gameState = "congratulations";
-      } else if (!classicMode && score >= 2) {
+      } 
+      else if (!classicMode && score >= 2) {
         gameState = "levelUp";
         countdownActive = true; // Start countdown after the level is completed
       }
       placeFood();
-    } else {
+    } 
+    else {
       this.body.shift();
     }
   }
@@ -294,8 +308,7 @@ function setupObstacles() {
       x = floor(random(cols));
       y = floor(random(rows));
     } while (
-      snake.body.some(seg => seg.x === x && seg.y === y) ||
-      (food && food.x === x && food.y === y) ||
+      snake.body.some(seg => seg.x === x && seg.y === y || food && food.x === x && food.y === y) ||
       obstacles.some(obs => obs.x === x && obs.y === y)
     );
     obstacles.push({ x, y });
@@ -332,7 +345,8 @@ function resetGame() {
   placeFood();
   if (!classicMode) {
     setupObstacles();
-  } else {
+  } 
+  else {
     obstacles = [];
   }
 }
