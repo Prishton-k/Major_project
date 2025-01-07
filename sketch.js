@@ -9,8 +9,6 @@ let obstacles = [];
 let classicButton, adventureButton, infoButton, restartButton;
 let classicMode = false; // Flag to distinguish Classic from Adventure mode
 let backToStartButton;
-let countdown = 3; // Countdown timer for next level
-let countdownActive = false;
 
 const buttonStyles = {
   classic: { bgColor: "#ffcc66", size: [80, 40] },
@@ -67,7 +65,7 @@ function setupButtons() {
   adventureButton.size(80, 40);
   styleButton(adventureButton, "adventure");
   adventureButton.mousePressed(() => {
-    gameState = "play";
+    gameState = "levelUp";
     classicMode = false;
     level = 1;
     hideButtons();
@@ -144,7 +142,7 @@ function drawGameOverScreen() {
   fill(255);
   text("Game Over", width / 2, height / 2 - 40);
   textSize(24);
-  text("Score ${score}", width / 2, height / 2);
+  text(`Score ${score}`, width / 2, height / 2);
   restartButton.html("Continue");
   restartButton.show();
 }
@@ -154,26 +152,9 @@ function drawLevelUpScreen() {
   textAlign(CENTER, CENTER);
   textSize(24);
   fill(255);
-  text("Level ${1} Complete!", width / 2, height / 3);
+  text(`Level ${level} Complete!`, width / 2, height / 3);
   textSize(18);
-  text("Starting next level in:", width / 2, height / 2 - 20);
-
-  if (countdownActive) {
-    textSize(32);
-    text(countdown, width / 2, height / 2 + 20);
-
-    if (frameCount % 50 === 0 && countdown > 0) {
-      countdown--;
-    }
-    
-  }
-
-  if (countdown <= 0) {
-    startNextLevel();
-  }
-  if(countdown ===1){
-    level ==="2";
-  }
+  text("Press any key to continue", width / 2, height / 2);
 }
 
 function drawCongratulationsScreen() {
@@ -207,8 +188,8 @@ function drawPlayScreen() {
   }
   fill(255);
   textSize(16);
-  text("Score: ${score}", 30, 20);
-  text("Level: ${level}", 30, 40);
+  text(`Score: ${score}`, 30, 20);
+  text(`Level: ${level}`, 30, 40);
 }
 
 function keyPressed() {
@@ -225,6 +206,12 @@ function keyPressed() {
     if (keyCode === RIGHT_ARROW && snake.dir.x === 0) {
       snake.setDir(1, 0);
     }
+    if (keyCode === ENTER){
+      gameState=== "levelUp";
+    }
+  } 
+  else if (gameState === "levelUp") {
+    startNextLevel();
   }
 }
 
@@ -237,7 +224,7 @@ class Snake {
   setDir(x, y) {
     this.dir = { x, y };
   }
-
+  // took the refrence from chatgpt and blackbox
   update() {
     if (this.dir.x === 0 && this.dir.y === 0) {
       return;
@@ -268,7 +255,6 @@ class Snake {
       } 
       else if (!classicMode && score >= 2) {
         gameState = "levelUp";
-        countdownActive = true; // Start countdown after the level is completed
       }
       placeFood();
     } 
@@ -328,8 +314,6 @@ function startNextLevel() {
     return;
   }
   level++;
-  countdown = 3; // Reset countdown
-  countdownActive = false;
   resetGame();
   snake.setDir(1, 0); // Automatically start moving right
   if (!classicMode) {
@@ -362,3 +346,4 @@ function showButtons() {
   adventureButton.show();
   infoButton.show();
 }
+
