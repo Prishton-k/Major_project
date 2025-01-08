@@ -206,7 +206,8 @@ function keyPressed() {
     if (keyCode === RIGHT_ARROW && snake.dir.x === 0) {
       snake.setDir(1, 0);
     }
-  } else if (gameState === "levelUp") {
+  } 
+  else if (gameState === "levelUp") {
     startNextLevel();
   }
 }
