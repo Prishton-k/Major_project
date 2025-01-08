@@ -4,15 +4,14 @@ let cols, rows;
 let snake, food, foodColor;
 let score = 0;
 let level = 1;
-let maxLevel = 5;
+let maxLevel = 10;
 let obstacles = [];
-let classicButton, adventureButton, infoButton, restartButton;
-let classicMode = false; // Flag to distinguish Classic from Adventure mode
-let backToStartButton;
+let classicButton, levelButton, infoButton, restartButton, backToStartButton;
+let classicMode = false;
 
 const buttonStyles = {
   classic: { bgColor: "#ffcc66", size: [80, 40] },
-  adventure: { bgColor: "#66cc66", size: [80, 40] },
+  level: { bgColor: "#66ccff", size: [80, 40] },
   restart: { bgColor: "#ffcc66", size: [80, 40] },
   backToStart: { bgColor: "#ff9966", size: [120, 40] },
   info: { bgColor: "white", size: [40, 40], fontSize: "20px", border: "2px solid black" }
@@ -22,7 +21,7 @@ function setup() {
   createCanvas(400, 400);
   cols = floor(width / gridSize);
   rows = floor(height / gridSize);
-  frameRate(10);
+  frameRate(10); // Constant speed
   snake = new Snake();
   placeFood();
   setupButtons();
@@ -48,26 +47,26 @@ function draw() {
 
 function setupButtons() {
   classicButton = createButton("Classic");
-  classicButton.position(width / 2 - 40, height / 2 + 50);
+  classicButton.position(width / 2 - 40, height / 2);
   classicButton.size(80, 40);
   styleButton(classicButton, "classic");
   classicButton.mousePressed(() => {
     gameState = "play";
     classicMode = true;
-    level = 1;
     score = 0;
     hideButtons();
     resetGame();
   });
 
-  adventureButton = createButton("Adventure");
-  adventureButton.position(width / 2 - 40, height / 2 + 100);
-  adventureButton.size(80, 40);
-  styleButton(adventureButton, "adventure");
-  adventureButton.mousePressed(() => {
-    gameState = "levelUp";
+  levelButton = createButton("Levels");
+  levelButton.position(width / 2 - 40, height / 2 + 50);
+  levelButton.size(80, 40);
+  styleButton(levelButton, "level");
+  levelButton.mousePressed(() => {
+    gameState = "play";
     classicMode = false;
     level = 1;
+    score = 0;
     hideButtons();
     resetGame();
   });
@@ -81,12 +80,11 @@ function setupButtons() {
       "How to Play:\n" +
         "- Use arrow keys to move the snake.\n" +
         "- Eat food to grow and earn points.\n" +
-        "- Classic: Play without levels.\n" +
-        "- Adventure: Progress through levels with obstacles!"
+        "- Classic mode is endless, Levels mode has challenges!"
     );
   });
 
-  restartButton = createButton("Continue");
+  restartButton = createButton("Restart");
   restartButton.position(width / 2 - 40, height / 2 + 50);
   restartButton.size(80, 40);
   styleButton(restartButton, "restart");
@@ -103,7 +101,6 @@ function setupButtons() {
   styleButton(backToStartButton, "backToStart");
   backToStartButton.mousePressed(() => {
     gameState = "start";
-    classicMode = true;
     level = 1;
     resetGame();
     showButtons();
@@ -130,7 +127,7 @@ function drawStartScreen() {
   text("Snake Game", width / 2, height / 3);
   textSize(20);
   fill(200);
-  text("Select 'Classic' or 'Adventure' to start", width / 2, height / 2 - 20);
+  text("Choose a mode to begin", width / 2, height / 2 - 20);
 }
 
 function drawGameOverScreen() {
@@ -142,8 +139,8 @@ function drawGameOverScreen() {
   fill(255);
   text("Game Over", width / 2, height / 2 - 40);
   textSize(24);
-  text(`Score ${score}`, width / 2, height / 2);
-  restartButton.html("Continue");
+  text(`Score: ${score}`, width / 2, height / 2);
+  restartButton.html("Restart");
   restartButton.show();
 }
 
@@ -154,7 +151,7 @@ function drawLevelUpScreen() {
   fill(255);
   text(`Level ${level} Complete!`, width / 2, height / 3);
   textSize(18);
-  text("Press any key to continue", width / 2, height / 2);
+  text("Press Enter to continue", width / 2, height / 2);
 }
 
 function drawCongratulationsScreen() {
@@ -172,24 +169,19 @@ function drawCongratulationsScreen() {
 }
 
 function drawPlayScreen() {
-  if (level > 1) {
-    drawSandTexture();
-  } 
-  else {
-    background(30, 50, 40);
-  }
+  background(30, 50, 40);
   snake.update();
   snake.show();
   noStroke();
   fill(foodColor);
   ellipse(food.x * gridSize + gridSize / 2, food.y * gridSize + gridSize / 2, gridSize, gridSize);
-  if (level > 1) {
+  if (!classicMode && level > 1) {
     drawObstacles();
   }
   fill(255);
   textSize(16);
   text(`Score: ${score}`, 30, 20);
-  text(`Level: ${level}`, 30, 40);
+  if (!classicMode) text(`Level: ${level}`, 30, 40);
 }
 
 function keyPressed() {
@@ -206,71 +198,77 @@ function keyPressed() {
     if (keyCode === RIGHT_ARROW && snake.dir.x === 0) {
       snake.setDir(1, 0);
     }
-    if (keyCode === ENTER){
-      gameState=== "levelUp";
-    }
-  } 
-  else if (gameState === "levelUp") {
+  } else if (!classicMode && gameState === "levelUp" && keyCode === ENTER) {
     startNextLevel();
   }
 }
 
-class Snake {
-  constructor() {
-    this.body = [{ x: floor(cols / 2), y: floor(rows / 2) }];
-    this.dir = { x: 0, y: 0 };
+function startNextLevel() {
+  if (level === maxLevel) {
+    gameState = "congratulations";
+    return;
   }
-
-  setDir(x, y) {
-    this.dir = { x, y };
-  }
-  // took the refrence from chatgpt and blackbox
-  update() {
-    if (this.dir.x === 0 && this.dir.y === 0) {
-      return;
-    }
-
-    let head = this.body[this.body.length - 1];
-    let newHead = { x: head.x + this.dir.x, y: head.y + this.dir.y };
-
-    // Wrap the snake around the edges
-    newHead.x = (newHead.x + cols) % cols;
-    newHead.y = (newHead.y + rows) % rows;
-
-    // Check for collisions
-    if (
-      this.body.some((part) => part.x === newHead.x && part.y === newHead.y ||!classicMode && level > 1 && obstacles.some((obs) => obs.x === newHead.x && obs.y === newHead.y))
-    ) {
-      gameState = "gameOver";
-      return;
-    }
-
-    this.body.push(newHead);
-
-    // Check for food
-    if (newHead.x === food.x && newHead.y === food.y) {
-      score++;
-      if (!classicMode && level === maxLevel && score >= 2) {
-        gameState = "congratulations";
-      } 
-      else if (!classicMode && score >= 2) {
-        gameState = "levelUp";
-      }
-      placeFood();
-    } 
-    else {
-      this.body.shift();
-    }
-  }
-
-  show() {
-    fill(0);
-    stroke(255);
-    for (let segment of this.body) {
-      rect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
-    }
-  }
+  level++; // Increase the level
+  resetGame(); // Reset game for the new level
+  setupObstacles(); // Set up obstacles for the new level
+  gameState = "play"; // Set the game state back to "play"
 }
+
+function Snake() {
+  this.body = [{ x: floor(cols / 2), y: floor(rows / 2) }];
+  this.dir = { x: 0, y: 0 }; // Snake is initially at rest (not moving)
+}
+
+Snake.prototype.setDir = function(x, y) {
+  this.dir = { x, y };
+};
+
+Snake.prototype.update = function() {
+  if (this.dir.x === 0 && this.dir.y === 0) {
+    return; // Snake doesn't move if the direction is (0, 0)
+  }
+
+  let head = this.body[this.body.length - 1];
+  let newHead = { x: head.x + this.dir.x, y: head.y + this.dir.y };
+
+  // Wrap the snake around the edges
+  newHead.x = (newHead.x + cols) % cols;
+  newHead.y = (newHead.y + rows) % rows;
+
+  // Check for collisions
+  if (
+    this.body.some((part) => part.x === newHead.x && part.y === newHead.y || 
+    !classicMode && level > 1 && obstacles.some((obs) => obs.x === newHead.x && obs.y === newHead.y))
+  ) {
+    gameState = "gameOver";
+    return;
+  }
+
+  this.body.push(newHead);
+
+  // Check for food
+  if (newHead.x === food.x && newHead.y === food.y) {
+    score += classicMode ? 5 : 1;
+    if (!classicMode && level === maxLevel && score >= 2) {
+      gameState = "congratulations";
+    } 
+    else if (!classicMode && score >= 2) {
+      gameState = "levelUp"; // Set game state to level up
+    }
+    placeFood();
+  } 
+  else {
+    this.body.shift();
+  }
+};
+
+Snake.prototype.show = function() {
+  fill(0);
+  stroke(255);
+  for (let segment of this.body) {
+    rect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+  }
+};
 
 function placeFood() {
   let valid = false;
@@ -278,7 +276,7 @@ function placeFood() {
     let x = floor(random(cols));
     let y = floor(random(rows));
     valid = !snake.body.some(seg => seg.x === x && seg.y === y) &&
-            (!classicMode || !obstacles.some(obs => obs.x === x && obs.y === y));
+            (!obstacles.some(obs => obs.x === x && obs.y === y));
     if (valid) {
       food = { x, y };
       foodColor = color(random(255), random(255), random(255));
@@ -308,42 +306,25 @@ function drawObstacles() {
   }
 }
 
-function startNextLevel() {
-  if (level === maxLevel) {
-    gameState = "congratulations";
-    return;
-  }
-  level++;
-  resetGame();
-  snake.setDir(1, 0); // Automatically start moving right
-  if (!classicMode) {
-    setupObstacles();
-  }
-  gameState = "play";
-}
-
 function resetGame() {
   gameState = "play"; // Ensure it's set to 'play' before starting
   snake = new Snake();
   score = 0;
   placeFood();
-  if (!classicMode) {
-    setupObstacles();
-  } 
-  else {
-    obstacles = [];
-  }
+  if (!classicMode) setupObstacles();
+  
+  // Snake stays still at the start of the game
+  snake.setDir(0, 0);  // Snake doesn't move initially
 }
 
 function hideButtons() {
   classicButton.hide();
-  adventureButton.hide();
+  levelButton.hide();
   infoButton.hide();
 }
 
 function showButtons() {
   classicButton.show();
-  adventureButton.show();
+  levelButton.show();
   infoButton.show();
 }
-
