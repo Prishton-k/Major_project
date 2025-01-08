@@ -65,7 +65,7 @@ function setupButtons() {
   adventureButton.size(80, 40);
   styleButton(adventureButton, "adventure");
   adventureButton.mousePressed(() => {
-    gameState = "levelUp";
+    gameState = "play";
     classicMode = false;
     level = 1;
     hideButtons();
@@ -206,11 +206,7 @@ function keyPressed() {
     if (keyCode === RIGHT_ARROW && snake.dir.x === 0) {
       snake.setDir(1, 0);
     }
-    if (keyCode === ENTER){
-      gameState=== "levelUp";
-    }
-  } 
-  else if (gameState === "levelUp") {
+  } else if (gameState === "levelUp") {
     startNextLevel();
   }
 }
@@ -224,7 +220,7 @@ class Snake {
   setDir(x, y) {
     this.dir = { x, y };
   }
-  // took the refrence from chatgpt and blackbox
+
   update() {
     if (this.dir.x === 0 && this.dir.y === 0) {
       return;
