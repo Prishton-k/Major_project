@@ -8,6 +8,7 @@ let maxLevel = 10;
 let obstacles = [];
 let classicButton, levelButton, infoButton, restartButton, backToStartButton;
 let classicMode = false;
+let coinSound; // Sound effect
 
 const buttonStyles = {
   classic: { bgColor: "#ffcc66", size: [80, 40] },
@@ -16,6 +17,10 @@ const buttonStyles = {
   backToStart: { bgColor: "#ff9966", size: [120, 40] },
   info: { bgColor: "white", size: [40, 40], fontSize: "20px", border: "2px solid black" }
 };
+
+function preload() {
+  coinSound = loadSound("coin.mp3"); // Load the sound file
+}
 
 function setup() {
   createCanvas(400, 400);
@@ -48,7 +53,6 @@ function draw() {
 function setupButtons() {
   classicButton = createButton("Classic");
   classicButton.position(width / 2 - 40, height / 2);
-  classicButton.size(80, 40);
   styleButton(classicButton, "classic");
   classicButton.mousePressed(() => {
     gameState = "play";
@@ -60,7 +64,6 @@ function setupButtons() {
 
   levelButton = createButton("Levels");
   levelButton.position(width / 2 - 40, height / 2 + 50);
-  levelButton.size(80, 40);
   styleButton(levelButton, "level");
   levelButton.mousePressed(() => {
     gameState = "play";
@@ -73,7 +76,6 @@ function setupButtons() {
 
   infoButton = createButton("?");
   infoButton.position(width - 50, 20);
-  infoButton.size(40, 40);
   styleButton(infoButton, "info");
   infoButton.mousePressed(() => {
     alert(
@@ -86,7 +88,6 @@ function setupButtons() {
 
   restartButton = createButton("Restart");
   restartButton.position(width / 2 - 40, height / 2 + 50);
-  restartButton.size(80, 40);
   styleButton(restartButton, "restart");
   restartButton.mousePressed(() => {
     gameState = "start";
@@ -97,7 +98,6 @@ function setupButtons() {
 
   backToStartButton = createButton("Back to Start");
   backToStartButton.position(width / 2 - 60, height / 2 + 110);
-  backToStartButton.size(120, 40);
   styleButton(backToStartButton, "backToStart");
   backToStartButton.mousePressed(() => {
     gameState = "start";
@@ -140,7 +140,6 @@ function drawGameOverScreen() {
   text("Game Over", width / 2, height / 2 - 40);
   textSize(24);
   text(`Score: ${score}`, width / 2, height / 2);
-  restartButton.html("Restart");
   restartButton.show();
 }
 
@@ -163,7 +162,6 @@ function drawCongratulationsScreen() {
   textSize(24);
   fill(255);
   text("You completed all levels!", width / 2, height / 2);
-  restartButton.hide();
   hideButtons();
   backToStartButton.show();
 }
@@ -181,27 +179,28 @@ function drawPlayScreen() {
   fill(255);
   textSize(16);
   text(`Score: ${score}`, 30, 20);
-  if (!classicMode){
+  if (!classicMode){ 
     text(`Level: ${level}`, 30, 40);
-  } 
+  }
+
 }
 
 function keyPressed() {
   if (gameState === "play") {
-    if (keyCode === UP_ARROW && snake.dir.y === 0) {
+    if (keyCode === UP_ARROW && snake.dir.y === 0){
       snake.setDir(0, -1);
-    }
-    if (keyCode === DOWN_ARROW && snake.dir.y === 0) {
+    } 
+    if (keyCode === DOWN_ARROW && snake.dir.y === 0)  {
       snake.setDir(0, 1);
     }
-    if (keyCode === LEFT_ARROW && snake.dir.x === 0) {
+    if (keyCode === LEFT_ARROW && snake.dir.x === 0)  {
       snake.setDir(-1, 0);
     }
     if (keyCode === RIGHT_ARROW && snake.dir.x === 0) {
       snake.setDir(1, 0);
     }
   } 
-  else if (!classicMode && gameState === "levelUp" && keyCode === ENTER) {
+  else if (gameState === "levelUp" && keyCode === ENTER) {
     startNextLevel();
   }
 }
@@ -211,15 +210,15 @@ function startNextLevel() {
     gameState = "congratulations";
     return;
   }
-  level++; // Increase the level
-  resetGame(); // Reset game for the new level
-  setupObstacles(); // Set up obstacles for the new level
-  gameState = "play"; // Set the game state back to "play"
+  level++;
+  resetGame();
+  setupObstacles();
+  gameState = "play";
 }
 
 function Snake() {
   this.body = [{ x: floor(cols / 2), y: floor(rows / 2) }];
-  this.dir = { x: 0, y: 0 }; // Snake is initially at rest (not moving)
+  this.dir = { x: 0, y: 0 };
 }
 
 Snake.prototype.setDir = function(x, y) {
@@ -228,20 +227,19 @@ Snake.prototype.setDir = function(x, y) {
 
 Snake.prototype.update = function() {
   if (this.dir.x === 0 && this.dir.y === 0) {
-    return; // Snake doesn't move if the direction is (0, 0)
+    return;
   }
 
   let head = this.body[this.body.length - 1];
   let newHead = { x: head.x + this.dir.x, y: head.y + this.dir.y };
 
-  // Wrap the snake around the edges
   newHead.x = (newHead.x + cols) % cols;
   newHead.y = (newHead.y + rows) % rows;
 
-  // Check for collisions
   if (
-    this.body.some((part) => part.x === newHead.x && part.y === newHead.y || 
-    !classicMode && level > 1 && obstacles.some((obs) => obs.x === newHead.x && obs.y === newHead.y))
+    this.body.some((part) => part.x === newHead.x && part.y === newHead.y ||!classicMode &&
+      level > 1 &&
+      obstacles.some((obs) => obs.x === newHead.x && obs.y === newHead.y))
   ) {
     gameState = "gameOver";
     return;
@@ -249,14 +247,18 @@ Snake.prototype.update = function() {
 
   this.body.push(newHead);
 
-  // Check for food
   if (newHead.x === food.x && newHead.y === food.y) {
     score += classicMode ? 5 : 1;
+
+    if (coinSound.isLoaded()){
+      coinSound.play();
+    } 
+
     if (!classicMode && level === maxLevel && score >= 2) {
       gameState = "congratulations";
     } 
     else if (!classicMode && score >= 2) {
-      gameState = "levelUp"; // Set game state to level up
+      gameState = "levelUp";
     }
     placeFood();
   } 
@@ -278,7 +280,9 @@ function placeFood() {
   while (!valid) {
     let x = floor(random(cols));
     let y = floor(random(rows));
-    valid = !snake.body.some(seg => seg.x === x && seg.y === y &&!obstacles.some(obs => obs.x === x && obs.y === y));
+    valid =
+      !snake.body.some((seg) => seg.x === x && seg.y === y) &&
+      !obstacles.some((obs) => obs.x === x && obs.y === y);
     if (valid) {
       food = { x, y };
       foodColor = color(random(255), random(255), random(255));
@@ -294,8 +298,8 @@ function setupObstacles() {
       x = floor(random(cols));
       y = floor(random(rows));
     } while (
-      snake.body.some(seg => seg.x === x && seg.y === y || food && food.x === x && food.y === y) ||
-      obstacles.some(obs => obs.x === x && obs.y === y)
+      snake.body.some((seg) => seg.x === x && seg.y === y) ||
+      obstacles.some((obs) => obs.x === x && obs.y === y)
     );
     obstacles.push({ x, y });
   }
@@ -309,16 +313,15 @@ function drawObstacles() {
 }
 
 function resetGame() {
-  gameState = "play"; // Ensure it's set to 'play' before starting
+  gameState = "play";
   snake = new Snake();
   score = 0;
   placeFood();
   if (!classicMode) {
     setupObstacles();
+
   }
-  
-  // Snake stays still at the start of the game
-  snake.setDir(0, 0);  // Snake doesn't move initially
+  snake.setDir(0, 0);
 }
 
 function hideButtons() {
