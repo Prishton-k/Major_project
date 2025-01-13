@@ -6,9 +6,10 @@ let score = 0;
 let level = 1;
 let maxLevel = 10;
 let obstacles = [];
-let classicButton, levelButton, infoButton, restartButton, backToStartButton;
+let classicButton, levelButton, restartButton, backToStartButton, infoButton;
 let classicMode = false;
-let coinSound; // Sound effect
+let coinSound, gameOverSound; // Sound effects
+let gameOverSoundPlayed = false; // Track if the game over sound has played
 
 const buttonStyles = {
   classic: { bgColor: "#ffcc66", size: [80, 40] },
@@ -19,7 +20,8 @@ const buttonStyles = {
 };
 
 function preload() {
-  coinSound = loadSound("coin.mp3"); // Load the sound file
+  coinSound = loadSound("coin.mp3"); // Load coin sound
+  gameOverSound = loadSound("game over.mp3"); // Load game over sound
 }
 
 function setup() {
@@ -35,17 +37,13 @@ function setup() {
 function draw() {
   if (gameState === "start") {
     drawStartScreen();
-  } 
-  else if (gameState === "gameOver") {
+  } else if (gameState === "gameOver") {
+    if (!gameOverSoundPlayed) {
+      gameOverSound.play(); // Play the sound
+      gameOverSoundPlayed = true; // Mark as played
+    }
     drawGameOverScreen();
-  } 
-  else if (gameState === "levelUp") {
-    drawLevelUpScreen();
-  } 
-  else if (gameState === "congratulations") {
-    drawCongratulationsScreen();
-  } 
-  else if (gameState === "play") {
+  } else if (gameState === "play") {
     drawPlayScreen();
   }
 }
@@ -58,8 +56,8 @@ function setupButtons() {
     gameState = "play";
     classicMode = true;
     score = 0;
-    hideButtons();
     resetGame();
+    hideButtons();
   });
 
   levelButton = createButton("Levels");
@@ -70,8 +68,8 @@ function setupButtons() {
     classicMode = false;
     level = 1;
     score = 0;
-    hideButtons();
     resetGame();
+    hideButtons();
   });
 
   infoButton = createButton("?");
@@ -91,6 +89,8 @@ function setupButtons() {
   styleButton(restartButton, "restart");
   restartButton.mousePressed(() => {
     gameState = "start";
+    stopGameOverSound();
+    resetGame();
     showButtons();
     restartButton.hide();
   });
@@ -101,7 +101,7 @@ function setupButtons() {
   styleButton(backToStartButton, "backToStart");
   backToStartButton.mousePressed(() => {
     gameState = "start";
-    level = 1;
+    stopGameOverSound();
     resetGame();
     showButtons();
     backToStartButton.hide();
@@ -141,28 +141,6 @@ function drawGameOverScreen() {
   textSize(24);
   text(`Score: ${score}`, width / 2, height / 2);
   restartButton.show();
-}
-
-function drawLevelUpScreen() {
-  background(30, 50, 40);
-  textAlign(CENTER, CENTER);
-  textSize(24);
-  fill(255);
-  text(`Level ${level} Complete!`, width / 2, height / 3);
-  textSize(18);
-  text("Press Enter to continue", width / 2, height / 2);
-}
-
-function drawCongratulationsScreen() {
-  background(50, 150, 200);
-  fill(255, 223, 0);
-  textAlign(CENTER, CENTER);
-  textSize(48);
-  text("Congratulations!", width / 2, height / 3);
-  textSize(24);
-  fill(255);
-  text("You completed all levels!", width / 2, height / 2);
-  hideButtons();
   backToStartButton.show();
 }
 
@@ -173,47 +151,16 @@ function drawPlayScreen() {
   noStroke();
   fill(foodColor);
   ellipse(food.x * gridSize + gridSize / 2, food.y * gridSize + gridSize / 2, gridSize, gridSize);
-  if (!classicMode && level > 1) {
-    drawObstacles();
-  }
   fill(255);
   textSize(16);
   text(`Score: ${score}`, 30, 20);
-  if (!classicMode){ 
-    text(`Level: ${level}`, 30, 40);
-  }
-
 }
 
-function keyPressed() {
-  if (gameState === "play") {
-    if (keyCode === UP_ARROW && snake.dir.y === 0){
-      snake.setDir(0, -1);
-    } 
-    if (keyCode === DOWN_ARROW && snake.dir.y === 0)  {
-      snake.setDir(0, 1);
-    }
-    if (keyCode === LEFT_ARROW && snake.dir.x === 0)  {
-      snake.setDir(-1, 0);
-    }
-    if (keyCode === RIGHT_ARROW && snake.dir.x === 0) {
-      snake.setDir(1, 0);
-    }
-  } 
-  else if (gameState === "levelUp" && keyCode === ENTER) {
-    startNextLevel();
+function stopGameOverSound() {
+  if (gameOverSound.isPlaying()) {
+    gameOverSound.stop();
   }
-}
-
-function startNextLevel() {
-  if (level === maxLevel) {
-    gameState = "congratulations";
-    return;
-  }
-  level++;
-  resetGame();
-  setupObstacles();
-  gameState = "play";
+  gameOverSoundPlayed = false; // Reset the flag
 }
 
 function Snake() {
@@ -221,11 +168,11 @@ function Snake() {
   this.dir = { x: 0, y: 0 };
 }
 
-Snake.prototype.setDir = function(x, y) {
+Snake.prototype.setDir = function (x, y) {
   this.dir = { x, y };
 };
 
-Snake.prototype.update = function() {
+Snake.prototype.update = function () {
   if (this.dir.x === 0 && this.dir.y === 0) {
     return;
   }
@@ -237,7 +184,8 @@ Snake.prototype.update = function() {
   newHead.y = (newHead.y + rows) % rows;
 
   if (
-    this.body.some((part) => part.x === newHead.x && part.y === newHead.y ||!classicMode &&
+    this.body.some((part) => part.x === newHead.x && part.y === newHead.y) ||
+    (!classicMode &&
       level > 1 &&
       obstacles.some((obs) => obs.x === newHead.x && obs.y === newHead.y))
   ) {
@@ -250,24 +198,22 @@ Snake.prototype.update = function() {
   if (newHead.x === food.x && newHead.y === food.y) {
     score += classicMode ? 5 : 1;
 
-    if (coinSound.isLoaded()){
+    if (coinSound.isLoaded()) {
       coinSound.play();
-    } 
+    }
 
     if (!classicMode && level === maxLevel && score >= 2) {
       gameState = "congratulations";
-    } 
-    else if (!classicMode && score >= 2) {
+    } else if (!classicMode && score >= 2) {
       gameState = "levelUp";
     }
     placeFood();
-  } 
-  else {
+  } else {
     this.body.shift();
   }
 };
 
-Snake.prototype.show = function() {
+Snake.prototype.show = function () {
   fill(0);
   stroke(255);
   for (let segment of this.body) {
@@ -276,17 +222,30 @@ Snake.prototype.show = function() {
 };
 
 function placeFood() {
-  let valid = false;
-  while (!valid) {
-    let x = floor(random(cols));
-    let y = floor(random(rows));
-    valid =
-      !snake.body.some((seg) => seg.x === x && seg.y === y) &&
-      !obstacles.some((obs) => obs.x === x && obs.y === y);
-    if (valid) {
-      food = { x, y };
-      foodColor = color(random(255), random(255), random(255));
+  let availablePositions = [];
+
+  // Generate a list of all grid positions
+  for (let x = 0; x < cols; x++) {
+    for (let y = 0; y < rows; y++) {
+      // Exclude positions occupied by the snake or obstacles
+      if (
+        !snake.body.some((seg) => seg.x === x && seg.y === y) &&
+        !obstacles.some((obs) => obs.x === x && obs.y === y)
+      ) {
+        availablePositions.push({ x, y });
+      }
     }
+  }
+
+  // Check if there are available positions
+  if (availablePositions.length > 0) {
+    // Pick a random valid position
+    let chosenPosition = random(availablePositions);
+    food = chosenPosition;
+    foodColor = color(random(255), random(255), random(255)); // Random color for food
+  } else {
+    console.error("No valid positions available for food!");
+    gameState = "gameOver"; // End the game if no space for food
   }
 }
 
@@ -319,7 +278,6 @@ function resetGame() {
   placeFood();
   if (!classicMode) {
     setupObstacles();
-
   }
   snake.setDir(0, 0);
 }
