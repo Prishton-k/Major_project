@@ -81,7 +81,8 @@ function setupButtons() {
     alert(
       "How to Play:\n" +
         "- Use arrow keys to move the snake.\n" +
-        "- Eat food to grow and earn points.\n" +
+        "- Eat food to grow and earn points and in level mode need 5 food to get on to the next level.\n" +
+        "-Press enter to move onto next level.\n" +
         "- Classic mode is endless, Levels mode has challenges!"
     );
   });
@@ -253,10 +254,10 @@ Snake.prototype.update = function () {
       coinSound.play();
     }
 
-    if (!classicMode && level === maxLevel && score >= 2) {
+    if (!classicMode && level === maxLevel && score >= 5) {
       gameState = "congratulations";
     } 
-    else if (!classicMode && score >= 2) {
+    else if (!classicMode && score >= 5) {
       gameState = "levelUp";
     }
     placeFood();
