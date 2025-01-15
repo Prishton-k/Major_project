@@ -238,7 +238,8 @@ Snake.prototype.update = function () {
 
   // Check for collisions
   if (
-    this.body.some((part) => part.x === newHead.x && part.y === newHead.y ||!classicMode && level > 1 &&obstacles.some((obs) => obs.x === newHead.x && obs.y === newHead.y))
+    this.body.some((part) => part.x === newHead.x && part.y === newHead.y) ||
+    (!classicMode && level > 1 && obstacles.some((obs) => obs.x === newHead.x && obs.y === newHead.y))
   ) {
     gameState = "gameOver";
     return;
@@ -251,18 +252,22 @@ Snake.prototype.update = function () {
     score += classicMode ? 5 : 1;
 
     if (coinSound.isLoaded()) {
+      coinSound.rate(1.5); // Set playback speed to 1.5x
       coinSound.play();
     }
 
     if (!classicMode && level === maxLevel && score >= 5) {
       gameState = "congratulations";
+<<<<<<< Updated upstream
     } 
     else if (!classicMode && score >= 5) {
+=======
+    } else if (!classicMode && score >= 2) {
+>>>>>>> Stashed changes
       gameState = "levelUp";
     }
     placeFood();
-  } 
-  else {
+  } else {
     this.body.shift();
   }
 };
@@ -276,34 +281,31 @@ Snake.prototype.show = function () {
 };
 
 function placeFood() {
-  let valid = false;
-  let attempts = 0; // Add a limit to prevent infinite loops
-  const maxAttempts = 100;
-
-  while (!valid && attempts < maxAttempts) {
-    let x = floor(random(cols));
-    let y = floor(random(rows));
-
-    // Check if food overlaps the snake or obstacles
-    valid = !snake.body.some((seg) => seg.x === x && seg.y === y) &&
-            !obstacles.some((obs) => obs.x === x && obs.y === y);
-
-    if (valid) {
-      food = { x, y };
-      foodColor = color(random(255), random(255), random(255));
-      return; // Exit the function if valid food is placed
+  let potentialPositions = [];
+  
+  // Collect all valid positions on the grid
+  for (let x = 0; x < cols; x++) {
+    for (let y = 0; y < rows; y++) {
+      let isSnakeSegment = snake.body.some((seg) => seg.x === x && seg.y === y);
+      let isObstacle = obstacles.some((obs) => obs.x === x && obs.y === y);
+      if (!isSnakeSegment && !isObstacle) {
+        potentialPositions.push({ x, y });
+      }
     }
-
-    attempts++;
   }
-
-  // Fallback in case valid placement isn't found
-  if (attempts >= maxAttempts) {
-    console.error("Could not find a valid place for food.");
-    food = { x: 0, y: 0 }; // Place food at a default location
+  
+  // Check if there are valid positions available
+  if (potentialPositions.length > 0) {
+    // Randomly select a position from the valid list
+    let chosenPos = random(potentialPositions);
+    food = chosenPos;
+    foodColor = color(random(255), random(255), random(255));
+  } else {
+    // Fallback if no valid positions are found
+    console.error("No valid position for food placement.");
+    food = { x: 0, y: 0 }; // Default location
   }
 }
-
 
 function setupObstacles() {
   obstacles = [];
