@@ -9,6 +9,7 @@ let obstacles = [];
 let classicButton, levelButton, infoButton, restartButton, backToStartButton;
 let classicMode = false;
 let coinSound; // Sound effect
+let levelBackgrounds = []; // Array to store backgrounds for each level
 
 const buttonStyles = {
   classic: { bgColor: "#ffcc66", size: [80, 40] },
@@ -20,6 +21,11 @@ const buttonStyles = {
 
 function preload() {
   coinSound = loadSound("coin.mp3"); // Load the sound file
+
+  // Preload backgrounds for each level
+  for (let i = 1; i <= maxLevel; i++) {
+    levelBackgrounds.push(color(random(50, 255), random(50, 255), random(50, 255)));
+  }
 }
 
 function setup() {
@@ -58,6 +64,7 @@ function setupButtons() {
     gameState = "play";
     classicMode = true;
     score = 0;
+    level = 1;
     hideButtons();
     resetGame();
   });
@@ -81,8 +88,7 @@ function setupButtons() {
     alert(
       "How to Play:\n" +
         "- Use arrow keys to move the snake.\n" +
-        "- Eat food to grow and earn points and in level mode need 5 food to get on to the next level.\n" +
-        "-Press enter to move onto next level.\n" +
+        "- Eat food to grow and earn points.\n" +
         "- Classic mode is endless, Levels mode has challenges!"
     );
   });
@@ -130,6 +136,7 @@ function drawStartScreen() {
   fill(200);
   text("Choose a mode to begin", width / 2, height / 2 - 20);
 }
+
 function drawGameOverScreen() {
   background(30, 50, 40);
   fill(200, 100, 50);
@@ -167,7 +174,9 @@ function drawCongratulationsScreen() {
 }
 
 function drawPlayScreen() {
-  background(30, 50, 40);
+  // Use the level-based background
+  background(levelBackgrounds[level - 1]);
+
   snake.update();
   snake.show();
   noStroke();
@@ -186,16 +195,16 @@ function drawPlayScreen() {
 
 function keyPressed() {
   if (gameState === "play") {
-    if (keyCode === UP_ARROW && snake.dir.y === 0){
+    if (keyCode === UP_ARROW && snake.dir.y === 0) {
       snake.setDir(0, -1);
-    } 
-    if (keyCode === DOWN_ARROW && snake.dir.y === 0){
+    }
+    if (keyCode === DOWN_ARROW && snake.dir.y === 0) {
       snake.setDir(0, 1);
-    } 
+    }
     if (keyCode === LEFT_ARROW && snake.dir.x === 0) {
       snake.setDir(-1, 0);
     }
-    if (keyCode === RIGHT_ARROW && snake.dir.x === 0){
+    if (keyCode === RIGHT_ARROW && snake.dir.x === 0) {
       snake.setDir(1, 0);
     }
   } 
@@ -238,8 +247,7 @@ Snake.prototype.update = function () {
 
   // Check for collisions
   if (
-    this.body.some((part) => part.x === newHead.x && part.y === newHead.y) ||
-    (!classicMode && level > 1 && obstacles.some((obs) => obs.x === newHead.x && obs.y === newHead.y))
+    this.body.some((part) => part.x === newHead.x && part.y === newHead.y || !classicMode && level > 1 && obstacles.some((obs) => obs.x === newHead.x && obs.y === newHead.y))
   ) {
     gameState = "gameOver";
     return;
@@ -252,22 +260,18 @@ Snake.prototype.update = function () {
     score += classicMode ? 5 : 1;
 
     if (coinSound.isLoaded()) {
-      coinSound.rate(1.5); // Set playback speed to 1.5x
       coinSound.play();
     }
 
-    if (!classicMode && level === maxLevel && score >= 5) {
+    if (!classicMode && level === maxLevel && score >= 2) {
       gameState = "congratulations";
-<<<<<<< Updated upstream
     } 
-    else if (!classicMode && score >= 5) {
-=======
-    } else if (!classicMode && score >= 2) {
->>>>>>> Stashed changes
+    else if (!classicMode && score >= 2) {
       gameState = "levelUp";
     }
     placeFood();
-  } else {
+  } 
+  else {
     this.body.shift();
   }
 };
@@ -282,7 +286,7 @@ Snake.prototype.show = function () {
 
 function placeFood() {
   let potentialPositions = [];
-  
+
   // Collect all valid positions on the grid
   for (let x = 0; x < cols; x++) {
     for (let y = 0; y < rows; y++) {
@@ -293,14 +297,15 @@ function placeFood() {
       }
     }
   }
-  
+
   // Check if there are valid positions available
   if (potentialPositions.length > 0) {
     // Randomly select a position from the valid list
     let chosenPos = random(potentialPositions);
     food = chosenPos;
     foodColor = color(random(255), random(255), random(255));
-  } else {
+  } 
+  else {
     // Fallback if no valid positions are found
     console.error("No valid position for food placement.");
     food = { x: 0, y: 0 }; // Default location
