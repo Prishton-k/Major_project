@@ -12,11 +12,11 @@ let coinSound; // Sound effect
 let levelBackgrounds = []; // Array to store backgrounds for each level
 
 const buttonStyles = {
-  classic: { bgColor: "#ffcc66", size: [80, 40] },
-  level: { bgColor: "#66ccff", size: [80, 40] },
-  restart: { bgColor: "#ffcc66", size: [80, 40] },
-  backToStart: { bgColor: "#ff9966", size: [120, 40] },
-  info: { bgColor: "white", size: [40, 40], fontSize: "20px", border: "2px solid black" }
+  classic: { bgColor:"#ffcc66",  size: [80, 40] },
+  level: { bgColor:"#66ccff",  size: [80, 40] },
+  restart: { bgColor:"#ffcc66",  size: [80, 40] },
+  backToStart: { bgColor:"#ff9966",  size: [120, 40] },
+  info: { bgColor: "white",   size: [40, 40], fontSize: "20px", border: "2px solid black" }
 };
 
 function preload() {
