@@ -24,7 +24,7 @@ function preload() {
 
   // Preload backgrounds for each level
   for (let i = 1; i <= maxLevel; i++) {
-    levelBackgrounds.push(color(random(50, 255), random(50, 255), random(50, 255)));
+    levelBackgrounds.push(color(random(30, 100), random(30, 100), random(30, 100)));
   }
 }
 
@@ -109,6 +109,7 @@ function setupButtons() {
   backToStartButton.mousePressed(() => {
     gameState = "start";
     level = 1;
+    score = 0;
     resetGame();
     showButtons();
     backToStartButton.hide();
@@ -135,6 +136,7 @@ function drawStartScreen() {
   textSize(20);
   fill(200);
   text("Choose a mode to begin", width / 2, height / 2 - 20);
+  showButtons();
 }
 
 function drawGameOverScreen() {
