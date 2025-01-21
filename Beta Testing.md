@@ -7,8 +7,6 @@
 - Classic Mode: Fun and smooth, but Game Over could have more excitement (e.g., screen shake).
 - Levels Mode: Good difficulty increase, nice background change. The "Congratulations" screen is nice.
 Usability Issues:
-
-- Buttons: "Restart" could be shown during the game. "Back to Start" should be available anytime.
 - Game Over: Needs more feedback when you lose (e.g., shake or flash).
 Sound: Good food sound, but more sounds needed (e.g., level-up, crash).
 

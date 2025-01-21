@@ -1,4 +1,3 @@
-let gameState = "start"; // Initial state
 let gridSize = 20;
 let cols, rows;
 let snake, food, foodColor;
@@ -10,6 +9,8 @@ let classicButton, levelButton, infoButton, restartButton, backToStartButton;
 let classicMode = false;
 let coinSound; // Sound effect
 let levelBackgrounds = []; // Array to store backgrounds for each level
+let startMusic, gameMusic, gameOverMusic; // Music variables
+let gameState = "start"; // Initialize game state
 
 const buttonStyles = {
   classic: { bgColor:"#ffcc66",  size: [80, 40] },
@@ -21,6 +22,9 @@ const buttonStyles = {
 
 function preload() {
   coinSound = loadSound("coin.mp3"); // Load the sound file
+  startMusic = loadSound("bg.mp3"); // Load start screen music
+  gameMusic = loadSound("gameBg.mp3"); // Load in-game music
+  gameOverMusic = loadSound("gameover.mp3"); // Load game over music
 
   // Preload backgrounds for each level
   for (let i = 1; i <= maxLevel; i++) {
@@ -137,6 +141,13 @@ function drawStartScreen() {
   fill(200);
   text("Choose a mode to begin", width / 2, height / 2 - 20);
   showButtons();
+  
+  // Play start screen music
+  if (!startMusic.isPlaying()) {
+    startMusic.loop();
+  }
+  gameMusic.stop();
+  gameOverMusic.stop();
 }
 
 function drawGameOverScreen() {
@@ -150,6 +161,17 @@ function drawGameOverScreen() {
   textSize(24);
   text(`Score: ${score}`, width / 2, height / 2);
   restartButton.show();
+  
+  // Stop the game music when the game is over
+  if (gameMusic.isPlaying()) {
+    gameMusic.stop();
+  }
+
+  // Play game over music
+  if (!gameOverMusic.isPlaying()) {
+    gameOverMusic.play();
+  }
+  startMusic.stop();
 }
 
 function drawLevelUpScreen() {
@@ -173,6 +195,16 @@ function drawCongratulationsScreen() {
   text("You completed all levels!", width / 2, height / 2);
   hideButtons();
   backToStartButton.show();
+  
+  // Stop the game music when the player wins
+  if (gameMusic.isPlaying()) {
+    gameMusic.stop();
+  }
+
+  // Play the start music when the player wins
+  if (!startMusic.isPlaying()) {
+    startMusic.loop(); // Loop the background music
+  }
 }
 
 function drawPlayScreen() {
@@ -193,6 +225,13 @@ function drawPlayScreen() {
   if (!classicMode) {
     text(`Level: ${level}`, 30, 40);
   }
+
+  // Play in-game music
+  if (!gameMusic.isPlaying()) {
+    gameMusic.loop();
+  }
+  startMusic.stop();
+  gameOverMusic.stop();
 }
 
 function keyPressed() {
@@ -247,9 +286,10 @@ Snake.prototype.update = function () {
   newHead.x = (newHead.x + cols) % cols;
   newHead.y = (newHead.y + rows) % rows;
 
-  // Check for collisions
+  // Check for collisions with itself or obstacles
   if (
-    this.body.some((part) => part.x === newHead.x && part.y === newHead.y || !classicMode && level > 1 && obstacles.some((obs) => obs.x === newHead.x && obs.y === newHead.y))
+    this.body.some((part) => part.x === newHead.x && part.y === newHead.y) ||
+    (!classicMode && level > 1 && obstacles.some((obs) => obs.x === newHead.x && obs.y === newHead.y))
   ) {
     gameState = "gameOver";
     return;
@@ -265,16 +305,16 @@ Snake.prototype.update = function () {
       coinSound.play();
     }
 
-    if (!classicMode && level === maxLevel && score >= 2) {
+    if (!classicMode && level === maxLevel && score >= 7) {
       gameState = "congratulations";
     } 
-    else if (!classicMode && score >= 2) {
+    else if (!classicMode && score >= 7) {
       gameState = "levelUp";
     }
-    placeFood();
+    placeFood(); // Place new food
   } 
   else {
-    this.body.shift();
+    this.body.shift(); // Remove the tail segment if food is not eaten
   }
 };
 
@@ -306,11 +346,9 @@ function placeFood() {
     let chosenPos = random(potentialPositions);
     food = chosenPos;
     foodColor = color(random(255), random(255), random(255));
-  } 
-  else {
-    // Fallback if no valid positions are found
-    console.error("No valid position for food placement.");
-    food = { x: 0, y: 0 }; // Default location
+  } else {
+    // If no valid positions are found, restart food placement
+    placeFood();
   }
 }
 
